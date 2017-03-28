@@ -279,6 +279,18 @@ public class CommonConfigurationKeysPublic {
   public static final String  HADOOP_SECURITY_AUTH_TO_LOCAL =
     "hadoop.security.auth_to_local";
 
+  /** Spawn kerberos ticket renewal thread */
+  public static final String HADOOP_SECURITY_RENEWAL_THREAD_ENABLE =
+    "hadoop.security.renewal.thread.enable";
+  /** Default value for HADOOP_SECURITY_RENEWAL_THREAD_ENABLE */
+  public static final boolean HADOOP_SECURITY_RENEWAL_THREAD_ENABLE_DEFAULT = true;
+  /** Kerberos ticket renewal thread should run kinit to renew ticket  */
+  public static final String HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN =
+    "hadoop.security.renewal.thread.only.relogin";
+  /** Default value for HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN */
+  public static final boolean HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN_DEFAULT = false;
+
+
   @Deprecated
   /** Only used by HttpServer. */
   public static final String HADOOP_SSL_ENABLED_KEY = "hadoop.ssl.enabled";

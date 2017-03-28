@@ -399,6 +399,26 @@ for ldap providers in the same way as above does.
 </property>
 
 <property>
+  <name>hadoop.security.renewal.thread.enable</name>
+  <value>true</value>
+  <description>Create a thread to renew the kerberos ticket before it expires.
+  When this thread is disabled (false), another process should renew the
+  kerberos ticket (e.g. k5start) and the relogin will happen at the first
+  sasl connection failure.
+  </description>
+</property>
+
+<property>
+  <name>hadoop.security.renewal.thread.only.relogin</name>
+  <value>false</value>
+  <description>By default (false), the renewal thread will first renew the
+    kerberos ticket by running kinit and then relogin from the ticket cache.
+    If true, we assume another process is renewing the ticket (e.g. k5start)
+    and we will only relogin.
+  </description>
+</property>
+
+<property>
   <name>hadoop.work.around.non.threadsafe.getpwuid</name>
   <value>false</value>
   <description>Some operating systems or authentication modules are known to

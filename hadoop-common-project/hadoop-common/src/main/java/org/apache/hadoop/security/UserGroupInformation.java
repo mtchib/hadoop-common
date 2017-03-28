@@ -18,6 +18,11 @@
 package org.apache.hadoop.security;
 
 import static org.apache.hadoop.fs.CommonConfigurationKeys.HADOOP_USER_GROUP_METRICS_PERCENTILES_INTERVALS;
+import static org.apache.hadoop.fs.CommonConfigurationKeys.HADOOP_SECURITY_RENEWAL_THREAD_ENABLE;
+import static org.apache.hadoop.fs.CommonConfigurationKeys.HADOOP_SECURITY_RENEWAL_THREAD_ENABLE_DEFAULT;
+import static org.apache.hadoop.fs.CommonConfigurationKeys.HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN;
+import static org.apache.hadoop.fs.CommonConfigurationKeys.HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN_DEFAULT;
+
 import static org.apache.hadoop.util.PlatformName.IBM_JAVA;
 
 import java.io.File;
@@ -885,13 +890,15 @@ public class UserGroupInformation {
   /**Spawn a thread to do periodic renewals of kerberos credentials*/
   private void spawnAutoRenewalThreadForUserCreds() {
     if (isSecurityEnabled()) {
+      boolean shouldSpawn = conf.getBoolean(HADOOP_SECURITY_RENEWAL_THREAD_ENABLE, HADOOP_SECURITY_RENEWAL_THREAD_ENABLE_DEFAULT);
       //spawn thread only if we have kerb credentials
       if (user.getAuthenticationMethod() == AuthenticationMethod.KERBEROS &&
-          !isKeytab) {
+          !isKeytab && shouldSpawn) {
         Thread t = new Thread(new Runnable() {
           
           @Override
           public void run() {
+            boolean shouldRenewTicket = ! conf.getBoolean(HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN, HADOOP_SECURITY_RENEWAL_THREAD_ONLY_RELOGIN_DEFAULT);
             String cmd = conf.get("hadoop.kerberos.kinit.command",
                                   "kinit");
             KerberosTicket tgt = getTGT();
@@ -909,9 +916,11 @@ public class UserGroupInformation {
                 if (now < nextRefresh) {
                   Thread.sleep(nextRefresh - now);
                 }
-                Shell.execCommand(cmd, "-R");
-                if(LOG.isDebugEnabled()) {
-                  LOG.debug("renewed ticket");
+                if(shouldRenewTicket) {
+                  Shell.execCommand(cmd, "-R");
+                  if (LOG.isDebugEnabled()) {
+                    LOG.debug("renewed ticket");
+                  }
                 }
                 reloginFromTicketCache();
                 tgt = getTGT();
